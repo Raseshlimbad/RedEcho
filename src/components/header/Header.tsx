@@ -8,10 +8,10 @@ import {
 } from "@clerk/nextjs";
 import { ChevronLeftIcon, MenuIcon } from "lucide-react";
 import Image from "next/image";
-import RedEchoLogo from "../../public/images/RedEcho_full_logo.png";
-import RedEchoLogoOnly from "../../public/images/RedEcho_logo_only.png";
-import { Button } from "./ui/button";
-import { useSidebar } from "./ui/sidebar";
+import RedEchoLogo from "../../../public/images/RedEcho_full_logo.png";
+import RedEchoLogoOnly from "../../../public/images/RedEcho_logo_only.png";
+import { Button } from "../ui/button";
+import { useSidebar } from "../ui/sidebar";
 
 const Header = () => {
   const { toggleSidebar, isMobile, open } = useSidebar();

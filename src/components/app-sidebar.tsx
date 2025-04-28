@@ -1,5 +1,5 @@
+import { FlameIcon, HomeIcon, Minus, Plus, TrendingUpIcon } from "lucide-react";
 import * as React from "react";
-import { FlameIcon, GalleryVerticalEnd, HomeIcon, Minus, Plus, TrendingUpIcon } from "lucide-react";
 
 import { SearchForm } from "@/components/search-form";
 import {
@@ -20,9 +20,11 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import { getSubechos } from "@/sanity/lib/subechos/getSubechos";
 import Image from "next/image";
+import Link from "next/link";
 import RedEchoLogo from "../../public/images/RedEcho_full_logo.png";
+import CreateCommunityButton from "./header/CreateCommunityButton";
 
 interface Sidebar {
   navMain: {
@@ -36,29 +38,26 @@ interface Sidebar {
   }[];
 }
 
-// This is sample data.
-const sidebarData = {
-  navMain: [
-    {
-      title: "Communities",
-      url: "#",
-      items: [
-        {
-          title: "Installation",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "Project Structure",
-          url: "#",
-          isActive: false,
-        },
-      ],
-    },
-  ],
-};
+export async function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const subechos = await getSubechos();
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // This is sample data.
+  const sidebarData = {
+    navMain: [
+      {
+        title: "Communities",
+        url: "#",
+        items: subechos?.map((subecho) => ({
+          title: subecho.title || "Unknown",
+          url: `/community/${subecho.slug}`,
+          isActive: false,
+        })),
+      },
+    ],
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -84,8 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                {/* TODO: add create community button */}
-                {/* <CreateCommunityButton /> */}
+                <CreateCommunityButton />
               </SidebarMenuButton>
 
               <SidebarMenuButton asChild>
@@ -108,7 +106,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   Hot/Controversial
                 </Link>
               </SidebarMenuButton>
-
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -138,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                               asChild
                               isActive={item.isActive}
                             >
-                              <a href={item.url}>{item.title}</a>
+                              <Link href={item.url}>{item.title}</Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}

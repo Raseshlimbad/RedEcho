@@ -302,6 +302,168 @@ export type SanityImageMetadata = {
 
 export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Vote | Comment | Post | Subecho | Slug | User | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata;
 export declare const internalGroqTypeReferenceTo: unique symbol;
+// Source: ./src/sanity/lib/comments/getPostComments.ts
+// Variable: getPostCommentsQuery
+// Query: *[_type == "comment" && post._ref == $postId && !defined(parentComment)] {        ...,        _id,        content,        createdAt,        "author": author->,        "replies": *[_type == "comment" && parentComment._ref == ^._id],        "votes": {            "upvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]),            "downvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "netScore": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]) - count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "voteStatus": *[_type == "vote" && comment.ref == ^._id && user._ref == $userId][0].voteType        }        } | order(votes.netScore desc, createdAt desc)
+export type GetPostCommentsQueryResult = Array<{
+  _id: string;
+  _type: "comment";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  content: string | null;
+  author: {
+    _id: string;
+    _type: "user";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    username?: string;
+    email?: string;
+    imageUrl?: {
+      asset?: {
+        _ref: string;
+        _type: "reference";
+        _weak?: boolean;
+        [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+      };
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    joinedAt?: string;
+    isReported?: boolean;
+  } | null;
+  post?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "post";
+  };
+  parentComment?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "comment";
+  };
+  isReported?: boolean;
+  createdAt: string | null;
+  isDeleted?: boolean;
+  replies: Array<{
+    _id: string;
+    _type: "comment";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    content?: string;
+    author?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "user";
+    };
+    post?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "post";
+    };
+    parentComment?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "comment";
+    };
+    isReported?: boolean;
+    createdAt?: string;
+    isDeleted?: boolean;
+  }>;
+  votes: {
+    upvotes: number;
+    downvotes: number;
+    netScore: number;
+    voteStatus: null;
+  };
+}>;
+
+// Source: ./src/sanity/lib/posts/getPosts.ts
+// Variable: getAllPostsQuery
+// Query: *[_type == "post" && isDeleted == false] {      _id,      title,      "slug": slug.current,      body,      publishedAt,      "author": author->,      "subecho": subecho->{        ...,        image{        alt,        "url": asset-> url      },      },      image{        alt,        "url": asset-> url      },      isDeleted,    } | order(publishedAt desc)
+export type GetAllPostsQueryResult = Array<{
+  _id: string;
+  title: string | null;
+  slug: null;
+  body: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+  publishedAt: string | null;
+  author: {
+    _id: string;
+    _type: "user";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    username?: string;
+    email?: string;
+    imageUrl?: {
+      asset?: {
+        _ref: string;
+        _type: "reference";
+        _weak?: boolean;
+        [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+      };
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    joinedAt?: string;
+    isReported?: boolean;
+  } | null;
+  subecho: {
+    _id: string;
+    _type: "subecho";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    title?: string;
+    description?: string;
+    slug?: Slug;
+    image: {
+      alt: string | null;
+      url: string | null;
+    } | null;
+    moderator?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "user";
+    };
+    createdAt?: string;
+  } | null;
+  image: {
+    alt: string | null;
+    url: string | null;
+  } | null;
+  isDeleted: boolean | null;
+}>;
+
 // Source: ./src/sanity/lib/subechos/createSubecho.ts
 // Variable: checkExistingSubechoQuery
 // Query: *[_type == "subecho" && name == $name][0]{            id        }
@@ -392,13 +554,57 @@ export type GetExistingUserQueryResult = {
   isReported?: boolean;
 } | null;
 
+// Source: ./src/sanity/lib/vote/getPostVotes.ts
+// Variable: getPostVotesQuery
+// Query: {    "upvotes" : count(*[_type == "vote" && post._ref == $postId && voteType == "upvote"]),    "downvotes" : count(*[_type == "vote" && post._ref == $postId && voteType == "downvote"]),    "netScore" : count(*[_type == "vote" && post._ref == $postId && voteType == "upvote"]) - count(*[_type == "vote" && post._ref == $postId && voteType == "downvote"])  }
+export type GetPostVotesQueryResult = {
+  upvotes: number;
+  downvotes: number;
+  netScore: number;
+};
+
+// Source: ./src/sanity/lib/vote/getUserPostVoteStatus.ts
+// Variable: getUserPostVoteStatusQuery
+// Query: [*[_type == "vote" && post._ref == $postId && user._ref == $userId][0]]
+export type GetUserPostVoteStatusQueryResult = Array<{
+  _id: string;
+  _type: "vote";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  user?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "user";
+  };
+  voteType?: "downvote" | "upvote";
+  post?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "post";
+  };
+  comment?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "comment";
+  };
+  createdAt?: string;
+} | null>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
+    "\n    *[_type == \"comment\" && post._ref == $postId && !defined(parentComment)] {\n        ...,\n        _id,\n        content,\n        createdAt,\n        \"author\": author->,\n        \"replies\": *[_type == \"comment\" && parentComment._ref == ^._id],\n        \"votes\": {\n            \"upvotes\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"upvote\"]),\n            \"downvotes\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"downvote\"]),\n            \"netScore\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"upvote\"]) - count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"downvote\"]),\n            \"voteStatus\": *[_type == \"vote\" && comment.ref == ^._id && user._ref == $userId][0].voteType\n        }\n        } | order(votes.netScore desc, createdAt desc)\n    ": GetPostCommentsQueryResult;
+    "*[_type == \"post\" && isDeleted == false] {\n      _id,\n      title,\n      \"slug\": slug.current,\n      body,\n      publishedAt,\n      \"author\": author->,\n      \"subecho\": subecho->{\n        ...,\n        image{\n        alt,\n        \"url\": asset-> url\n      },\n      },\n      image{\n        alt,\n        \"url\": asset-> url\n      },\n      isDeleted,\n    } | order(publishedAt desc)": GetAllPostsQueryResult;
     "*[_type == \"subecho\" && name == $name][0]{\n            id\n        }": CheckExistingSubechoQueryResult;
     "*[_type == \"subecho\" && slug.current == $slug][0]{\n            id\n        }": CheckSlugQueryResult;
     "*[_type == \"subecho\"] {\n        ...,\n        \"slug\": slug.current,\n        \"moderator\": moderator->,\n    } | order(createdAt desc)": GetSubechosQueryResult;
     "*[_type == \"user\" && _id == $id][0]": GetExistingUserQueryResult;
+    "{\n    \"upvotes\" : count(*[_type == \"vote\" && post._ref == $postId && voteType == \"upvote\"]),\n    \"downvotes\" : count(*[_type == \"vote\" && post._ref == $postId && voteType == \"downvote\"]),\n    \"netScore\" : count(*[_type == \"vote\" && post._ref == $postId && voteType == \"upvote\"]) - count(*[_type == \"vote\" && post._ref == $postId && voteType == \"downvote\"])\n  }": GetPostVotesQueryResult;
+    "[*[_type == \"vote\" && post._ref == $postId && user._ref == $userId][0]]": GetUserPostVoteStatusQueryResult;
   }
 }

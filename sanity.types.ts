@@ -302,10 +302,10 @@ export type SanityImageMetadata = {
 
 export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Vote | Comment | Post | Subecho | Slug | User | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata;
 export declare const internalGroqTypeReferenceTo: unique symbol;
-// Source: ./src/sanity/lib/comments/getPostComments.ts
-// Variable: getPostCommentsQuery
-// Query: *[_type == "comment" && post._ref == $postId && !defined(parentComment)] {        ...,        _id,        content,        createdAt,        "author": author->,        "replies": *[_type == "comment" && parentComment._ref == ^._id],        "votes": {            "upvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]),            "downvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "netScore": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]) - count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "voteStatus": *[_type == "vote" && comment.ref == ^._id && user._ref == $userId][0].voteType        }        } | order(votes.netScore desc, createdAt desc)
-export type GetPostCommentsQueryResult = Array<{
+// Source: ./src/sanity/lib/comments/getCommentReplies.ts
+// Variable: getCommentRepliesQuery
+// Query: *[_type == "comment" && parentComment._ref == $commentId] {        ...,        _id,        content,        createdAt,        "author": author->,        "replies": *[_type == "comment" && parentComment._ref == ^._id],        "votes": {            "upvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]),            "downvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "netScore": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]) - count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "voteStatus": *[_type == "vote" && comment.ref == ^._id && user._ref == $userId][0].voteType        }        } | order(votes.netScore desc)
+export type GetCommentRepliesQueryResult = Array<{
   _id: string;
   _type: "comment";
   _createdAt: string;
@@ -320,18 +320,8 @@ export type GetPostCommentsQueryResult = Array<{
     _rev: string;
     username?: string;
     email?: string;
-    imageUrl?: {
-      asset?: {
-        _ref: string;
-        _type: "reference";
-        _weak?: boolean;
-        [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-      };
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    };
+    // 
+    imageUrl?: string | null;
     joinedAt?: string;
     isReported?: boolean;
   } | null;
@@ -383,7 +373,95 @@ export type GetPostCommentsQueryResult = Array<{
     upvotes: number;
     downvotes: number;
     netScore: number;
-    voteStatus: null;
+    // voteStatus: null;
+    voteStatus: GetUserPostVoteStatusQueryResult;
+  };
+}>;
+
+// Source: ./src/sanity/lib/comments/getPostComments.ts
+// Variable: getPostCommentsQuery
+// Query: *[_type == "comment" && post._ref == $postId && !defined(parentComment)] {        ...,        _id,        content,        createdAt,        "author": author->,        "replies": *[_type == "comment" && parentComment._ref == ^._id],        "votes": {            "upvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]),            "downvotes": count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "netScore": count(*[_type == "vote" && comment._ref == ^._id && voteType == "upvote"]) - count(*[_type == "vote" && comment._ref == ^._id && voteType == "downvote"]),            "voteStatus": *[_type == "vote" && comment.ref == ^._id && user._ref == $userId][0].voteType        }        } | order(votes.netScore desc, createdAt desc)
+export type GetPostCommentsQueryResult = Array<{
+  _id: string;
+  _type: "comment";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  content: string | null;
+  author: {
+    _id: string;
+    _type: "user";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    username?: string;
+    email?: string;
+    // imageUrl?: {
+    //   asset?: {
+    //     _ref: string;
+    //     _type: "reference";
+    //     _weak?: boolean;
+    //     [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+    //   };
+    //   media?: unknown;
+    //   hotspot?: SanityImageHotspot;
+    //   crop?: SanityImageCrop;
+    //   _type: "image";
+    // };
+    imageUrl?: string | null;
+    joinedAt?: string;
+    isReported?: boolean;
+  } | null;
+  post?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "post";
+  };
+  parentComment?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "comment";
+  };
+  isReported?: boolean;
+  createdAt: string | null;
+  isDeleted?: boolean;
+  replies: Array<{
+    _id: string;
+    _type: "comment";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    content?: string;
+    author?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "user";
+    };
+    post?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "post";
+    };
+    parentComment?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "comment";
+    };
+    isReported?: boolean;
+    createdAt?: string;
+    isDeleted?: boolean;
+  }>;
+  votes: {
+    upvotes: number;
+    downvotes: number;
+    netScore: number;
+    // voteStatus: null;
+    voteStatus: GetUserPostVoteStatusQueryResult;
   };
 }>;
 
@@ -598,6 +676,7 @@ export type GetUserPostVoteStatusQueryResult = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
+    "\n    *[_type == \"comment\" && parentComment._ref == $commentId] {\n        ...,\n        _id,\n        content,\n        createdAt,\n        \"author\": author->,\n        \"replies\": *[_type == \"comment\" && parentComment._ref == ^._id],\n        \"votes\": {\n            \"upvotes\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"upvote\"]),\n            \"downvotes\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"downvote\"]),\n            \"netScore\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"upvote\"]) - count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"downvote\"]),\n            \"voteStatus\": *[_type == \"vote\" && comment.ref == ^._id && user._ref == $userId][0].voteType\n        }\n        } | order(votes.netScore desc)\n    ": GetCommentRepliesQueryResult;
     "\n    *[_type == \"comment\" && post._ref == $postId && !defined(parentComment)] {\n        ...,\n        _id,\n        content,\n        createdAt,\n        \"author\": author->,\n        \"replies\": *[_type == \"comment\" && parentComment._ref == ^._id],\n        \"votes\": {\n            \"upvotes\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"upvote\"]),\n            \"downvotes\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"downvote\"]),\n            \"netScore\": count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"upvote\"]) - count(*[_type == \"vote\" && comment._ref == ^._id && voteType == \"downvote\"]),\n            \"voteStatus\": *[_type == \"vote\" && comment.ref == ^._id && user._ref == $userId][0].voteType\n        }\n        } | order(votes.netScore desc, createdAt desc)\n    ": GetPostCommentsQueryResult;
     "*[_type == \"post\" && isDeleted == false] {\n      _id,\n      title,\n      \"slug\": slug.current,\n      body,\n      publishedAt,\n      \"author\": author->,\n      \"subecho\": subecho->{\n        ...,\n        image{\n        alt,\n        \"url\": asset-> url\n      },\n      },\n      image{\n        alt,\n        \"url\": asset-> url\n      },\n      isDeleted,\n    } | order(publishedAt desc)": GetAllPostsQueryResult;
     "*[_type == \"subecho\" && name == $name][0]{\n            id\n        }": CheckExistingSubechoQueryResult;

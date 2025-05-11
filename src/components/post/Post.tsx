@@ -6,6 +6,8 @@ import TimeAgo from "../ui/TimeAgo";
 import Image from "next/image";
 import { MessageSquare } from "lucide-react";
 import CommentInput from "../comment/CommentInput";
+import CommentList from "../comment/CommentList";
+import PostVoteButtons from "../vote/PostVoteButtons";
 
 interface PostProps {
   post: GetAllPostsQueryResult[number];
@@ -23,6 +25,12 @@ const Post = async ({ post, userId }: PostProps) => {
     >
       <div className="flex">
         {/* Vote Buttons */}
+        <PostVoteButtons
+          contentId={post._id}
+          votes={votes}
+          vote={vote}
+          contentType="comment"
+        />
 
         {/* Post Content */}
         <div className="flex-2 p-3">
@@ -86,6 +94,7 @@ const Post = async ({ post, userId }: PostProps) => {
           {/* CommentInput */}
           <CommentInput postId={post._id} />
           {/* CommentList */}
+          <CommentList postId={post._id} comments={comments} userId={userId} />
         </div>
       </div>
 

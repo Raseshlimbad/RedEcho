@@ -43,7 +43,6 @@ export const createCommunity = async (
             contentType: imageContentType,
           };
         }
-    console.log("Image data:", imageData);
 
     const result = await createSubecho(
         name,

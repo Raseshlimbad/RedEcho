@@ -3,15 +3,12 @@ import { UserCircle } from "lucide-react";
 import Image from "next/image";
 import {
   GetCommentRepliesQueryResult,
-  GetPostCommentsQueryResult,
-  GetUserPostVoteStatusQueryResult,
-  SanityImageCrop,
-  SanityImageHotspot,
+  GetPostCommentsQueryResult
 } from "sanity.types";
 import TimeAgo from "../ui/TimeAgo";
+import PostVoteButtons from "../vote/PostVoteButtons";
 import CommentList from "./CommentList";
 import CommentReply from "./CommentReply";
-import PostVoteButtons from "../vote/PostVoteButtons";
 
 const Comment = async ({
   postId,
